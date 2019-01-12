@@ -45,7 +45,17 @@ def normalize_planes(ct_image):
     normalized_image[normalized_image<0]=0
     return normalized_image
 
+def draw_box(data,y,x,radius=30,pad=2):
+    data[max(0, y - radius):min(data.shape[0], y + radius),\
+            max(0, x - radius - pad):max(0, x - radius)] = 3000
+    data[max(0, y - radius):min(data.shape[0], y + radius),\
+        min(data.shape[1], x + radius):min(data.shape[1], x + radius + pad)] = 3000
+    data[max(0, y - radius - pad):max(0, y - radius),\
+        max(0, x - radius):min(data.shape[1], x + radius)] = 3000
+    data[min(data.shape[0], y + radius):min(data.shape[0], y + radius + pad),\
+        max(0, x - radius):min(data.shape[1], x + radius)] = 3000  # 横线
 
+    return data
 
 image_path=conf.CT_dir+'1.3.6.1.4.1.14519.5.2.1.6279.6001.105756658031515062000744821260.mhd'
 csv_path=conf.scv_dir+'candidates.csv'
@@ -65,23 +75,21 @@ candidates=read_csv(csv_path)
 #for i in range(conf.batch_size+1):
 #    print(candidates[i])
 #    pass
-cand=candidates[1:3]
+
+start=9313
+
+cand=candidates[start+1:start+1+conf.batch_size]
 cand=np.asarray(cand)
 world_coord=np.asarray([cand[:,3],cand[:,2],cand[:,1]],dtype=float).T
 voxel_coord=np.rint(coord_convert(world_coord,origin,spacing)).astype(int)
 
 
-for k in range(9315,(9315+conf.batch_size)):
-    i=k-9315
-    patch=image[voxel_coord[i][0],voxel_coord[i][1]-60:voxel_coord[i][1]+60,voxel_coord[i][2]-60:voxel_coord[i][2]+60]
-    plt.figure(i)
-    plt.title('original image')
-    plt.subplot(2,1,1)
-    plt.imshow(image[voxel_coord[i][0]])
-    plt.subplot(2,1,2)
-    
-    plt.title('shortcut image:'+str(cand[i][4]))
-    plt.imshow(patch)
+for i in range(0,conf.batch_size):
+    #patch=image
+    plt.clf()
+    image_no_cut=np.copy(image[voxel_coord[i][0]])#避免引用传参
+    new_image=draw_box(image_no_cut,voxel_coord[i][1],voxel_coord[i][2],radius=10,pad=2)
+    plt.imshow(new_image,cmap='gray')
     plt.show()
 
 #numpyImage, numpyOrigin, numpySpacing = load_image(image_path)
