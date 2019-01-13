@@ -1,9 +1,9 @@
 # LUNA16
 
 LUNA16 competition repository
-�ṹ˵����
-/<br/>
-	<p style="text-indent:2em">Config/</p></br>
-		<p style="text-indent:4em">Confog.py#ȫ�ֲ��������ļ�</p></br>
-	<p style="text-indent:2em">data_proc/</p></br>
-		<p style="text-indent:4em">reader_disp.py#������Ҫ��ͼ���ȡ��csv���ݶ�ȡ�Լ���ʾ����ҪĿ����Ϊ����Ϥ���ݣ����е�һЩ����Ҳ��������������ݴ�������</p></br>
+结构说明：<br/>
+>/
+>>Config/
+>>>Confog.py#全局参量配置文件
+>>data_proc/
+>>>reader_disp.py#里面主要是图像读取跟csv数据读取以及显示，主要目的是为了熟悉数据，其中的一些函数也会用于网络的数据处理部分
