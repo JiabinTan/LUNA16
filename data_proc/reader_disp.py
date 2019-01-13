@@ -1,10 +1,9 @@
 import SimpleITK as sitk
 import numpy as np
-import csv
 import os
 import matplotlib.pyplot as plt
 from PIL import Image
-
+import pandas as pd
 import sys
 
 
@@ -16,6 +15,7 @@ sys.path.append('..//')
 
 from Config.Config import Config as conf
 
+
 def load_image(filename):
     image=sitk.ReadImage(filename)
     numpy_image=sitk.GetArrayFromImage(image)
@@ -24,12 +24,7 @@ def load_image(filename):
     return numpy_image,numpy_origin,numpy_spacing
 def read_csv(filename):
     lines=[]
-    with open(filename) as f:
-        csvreader=csv.reader(f)
-        for line in csvreader:
-            lines.append(line)
-            pass
-        pass
+    lines=pd.read_csv(filename)
     return lines
 def coord_convert(worldcood,origin,spacing):
     stretched_voxel_coord=np.absolute(worldcood-origin)
@@ -57,7 +52,9 @@ def draw_box(data,y,x,radius=30,pad=2):
 
     return data
 
-image_path=conf.CT_dir+'1.3.6.1.4.1.14519.5.2.1.6279.6001.105756658031515062000744821260.mhd'
+#image_path=conf.CT_dir+'1.3.6.1.4.1.14519.5.2.1.6279.6001.105756658031515062000744821260.mhd'
+#1.3.6.1.4.1.14519.5.2.1.6279.6001.108197895896446896160048741492 
+image_path=conf.CT_dir+'1.3.6.1.4.1.14519.5.2.1.6279.6001.108197895896446896160048741492.mhd'
 csv_path=conf.scv_dir+'candidates.csv'
 
 image,origin,spacing=load_image(image_path)
@@ -76,11 +73,15 @@ candidates=read_csv(csv_path)
 #    print(candidates[i])
 #    pass
 
-start=9313
+start=15647
+#9313
+#16051
 
-cand=candidates[start+1:start+1+conf.batch_size]
+cand=candidates.loc[15645:15654]
 cand=np.asarray(cand)
 world_coord=np.asarray([cand[:,3],cand[:,2],cand[:,1]],dtype=float).T
+print(world_coord)
+print(coord_convert(world_coord,origin,spacing))
 voxel_coord=np.rint(coord_convert(world_coord,origin,spacing)).astype(int)
 
 
@@ -89,6 +90,7 @@ for i in range(0,conf.batch_size):
     plt.clf()
     image_no_cut=np.copy(image[voxel_coord[i][0]])#避免引用传参
     new_image=draw_box(image_no_cut,voxel_coord[i][1],voxel_coord[i][2],radius=10,pad=2)
+    plt.title(str(cand[i][4]))
     plt.imshow(new_image,cmap='gray')
     plt.show()
 
