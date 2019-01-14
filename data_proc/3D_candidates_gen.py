@@ -56,6 +56,7 @@ def get_3D_candidate(image,origin,spacing,candidates,ys,z_pad=36,y_pad=48,x_pad=
 def main(file_dir):
     file_names_l1=[]#当前文件目录，level_1
     file_names_l1=os.listdir(file_dir)
+    file_name_l1=[i for i in file_name_l1 if not re.match(r'^subset\d$',i)]
     csv_path=conf.scv_dir+'candidates.csv'
     candidates=reader.read_csv(csv_path)
 
@@ -69,7 +70,7 @@ def main(file_dir):
         file_name_l2=os.listdir(dir_path)#level_2
         if(not file_names_l2):
             print('no files')
-            return
+            continue
         file_name_l2=[i for i in file_name_l2 if not re.match(r'.+raw$',i)]
         for i in file_name_l2:
             file_name=dir_path+conf.separate+i  #文件名
