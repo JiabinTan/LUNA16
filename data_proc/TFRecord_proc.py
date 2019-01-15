@@ -42,7 +42,6 @@ class TFRecord(object):
     '''
     def reader(tfrecords_filename,is_batch=False,is_shuffle=False,batch_size=32,z_size=36,y_size=48,x_size=48):
         filename_queue = tf.train.string_input_producer([tfrecords_filename])
-
         reader = tf.TFRecordReader()
         _, serialized_example = reader.read(filename_queue)   #返回文件名和文件
         features = tf.parse_single_example(serialized_example,
