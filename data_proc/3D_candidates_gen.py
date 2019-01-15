@@ -1,3 +1,5 @@
+#!/usr/bin/python2.6  
+# -*- coding: utf-8 -*-
 import os
 import sys
 sys.path.append('..//')
@@ -5,6 +7,7 @@ from Config.Config import Config as conf
 import re
 import reader_disp as reader
 import numpy as np
+import TFRecord_proc.TFRecord as tfrd
 '''
 获取3D训练数据
 
@@ -114,7 +117,11 @@ def main(file_dir):
                         data=set[()][0]
                         label=set[()][1]
                         '''
-                        np.save(save_name+str(int(count/1000)),np.array([data_set,label_set]))
+                        #np.save(save_name+str(int(count/1000)),np.array([data_set,label_set]))
+
+                        dir=save_name+str(int(count/1000))
+                        tfrd.writer(data_set,label_set,dir)
+
                         data_set=np.array([data])
                         label_set=np.array([label])
                         pass
@@ -122,6 +129,7 @@ def main(file_dir):
                         data_set=np.array([data])
                         label_set=np.array([label])
                         pass
+
                 else:
                     data_set=np.insert(data_set,1,data,axis=0)
                     label_set=np.stack(label_set,1,label,axis=0)

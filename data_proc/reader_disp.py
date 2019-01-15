@@ -1,5 +1,7 @@
 import SimpleITK as sitk
 import numpy as np
+#!/usr/bin/python2.6  
+# -*- coding: utf-8 -*-
 import os
 import matplotlib.pyplot as plt
 from PIL import Image
