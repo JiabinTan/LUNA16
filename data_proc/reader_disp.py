@@ -15,17 +15,35 @@ sys.path.append('..//')
 
 from Config.Config import Config as conf
 
+'''
+读取图像相关数据
 
+输入：
+图像数据路径
+
+输出：
+图像数据、原点、缩放因子
+'''
 def load_image(filename):
     image=sitk.ReadImage(filename)
     numpy_image=sitk.GetArrayFromImage(image)
     numpy_origin=np.array(list(reversed(image.GetOrigin())))
     numpy_spacing=np.array(list(reversed(image.GetSpacing())))
     return numpy_image,numpy_origin,numpy_spacing
+'''
+读取候选区数据
+输入：候选区文件路径
+输出：pd的数据类型，可以直接使用pandas进行相关处理
+'''
 def read_csv(filename):
     lines=[]
     lines=pd.read_csv(filename)
     return lines
+'''
+坐标转换
+输入：候选区坐标、原点、缩放因子
+输出：对应的image数组中的index
+'''
 def coord_convert(worldcood,origin,spacing):
     stretched_voxel_coord=np.absolute(worldcood-origin)
     voxel_coord=stretched_voxel_coord/spacing
@@ -39,7 +57,11 @@ def normalize_planes(ct_image):
     normalized_image[normalized_image>1]=1
     normalized_image[normalized_image<0]=0
     return normalized_image
-
+'''
+这边是对2D来说的，把候选区的位置在图片上框出来
+输入：图片数据，x，y坐标，框的半径、框的厚度
+输出：加入框的图片数据
+'''
 def draw_box(data,y,x,radius=30,pad=2):
     data[max(0, y - radius):min(data.shape[0], y + radius),\
             max(0, x - radius - pad):max(0, x - radius)] = 3000

@@ -5,7 +5,23 @@ from Config.Config import Config as conf
 import re
 import reader_disp as reader
 import numpy as np
+'''
+获取3D训练数据
 
+输入参量：
+image：图像数据，整个数据
+origin：原点
+spacing：缩放因子
+candidate：一系列选区，这边应该是个数组
+ys:对应的label，也是个数组
+z_pad:需要的z方向的大小
+y_pad：需要的y方向的大小
+x_pad:需要的x方向的大小
+
+输出：
+
+一个z_pad*y_pad*x_pad大小的数据块
+'''
 def get_3D_candidate(image,origin,spacing,candidates,ys,z_pad=36,y_pad=48,x_pad=48):
     for index,values in enumerate(candidates):
         #提取label
@@ -50,8 +66,12 @@ def get_3D_candidate(image,origin,spacing,candidates,ys,z_pad=36,y_pad=48,x_pad=
 
         
 '''
-输入subset文件夹的目录
-保存所有候选区的3d数据
+生成候选区数据并保存
+
+输入：输入subset文件夹的目录
+
+输出：保存所有候选区的3d数据
+
 '''
 def main(file_dir):
     file_names_l1=[]#当前文件目录，level_1
