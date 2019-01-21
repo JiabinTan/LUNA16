@@ -106,7 +106,8 @@ def main(file_dir):
             voxel_coord=np.rint(reader.coord_convert(cand_list[:,:-1],origin,spacing)).astype(int)
             #得到3D图像数据，数据大小可以制定，默认36*48*48
             crop_data=get_3D_candidate(image,origin,spacing,voxel_coord,class_y)
-            
+            data_set=[]
+            label_set=[]
             
             for data,label in crop_data:
                 if((count%1000==0)):
@@ -125,6 +126,7 @@ def main(file_dir):
                         data_set=np.array([data])
                         label_set=np.array([label])
                         pass
+
                     else:
                         data_set=np.array([data])
                         label_set=np.array([label])
@@ -137,6 +139,10 @@ def main(file_dir):
                 count+=1
                 pass
 
+            if((count%1001)==0):
+                dir=save_name+str(int(count/1000)+1)
+                tfrd.writer(data_set,label_set,dir)
+                pass
 
 
 
