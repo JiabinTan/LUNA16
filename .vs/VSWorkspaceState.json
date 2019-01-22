@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\Config",
-    "\\data_proc"
+    "\\data_proc",
+    "\\extend"
   ],
-  "SelectedNode": "\\Model.py",
+  "SelectedNode": "\\extend\\email.py",
   "PreviewInSolutionExplorer": false
 }

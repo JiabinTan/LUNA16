@@ -8,6 +8,18 @@ import re
 import reader_disp as reader
 import numpy as np
 import TFRecord_proc.TFRecord as tfrd
+
+from skimage.segmentation import clear_border
+from skimage.measure import label,regionprops, perimeter
+from skimage.morphology import ball, disk, dilation, binary_erosion, remove_small_objects, erosion, closing, reconstruction, binary_closing
+from skimage.filters import roberts, sobel
+from scipy import ndimage as ndi
+
+
+
+
+
+
 '''
 获取3D训练数据
 
@@ -66,6 +78,100 @@ def get_3D_candidate(image,origin,spacing,candidates,ys,z_pad=36,y_pad=48,x_pad=
                 pass
 
         yield data,y
+'''
+把CT图像进行处理，只保留肺部图像
+输入：
+ct_scan:输入的CT图像组，三维
+输出：
+处理完后的CT图像组，三维
+'''
+def segment_lung_from_ct_scan(ct_scan):
+    return np.asarray([get_segmented_lungs(slice) for slice in ct_scan])
+
+'''
+输入：
+im:输入的CT图像，二维
+plot：是否显示，不需要显示，最后直接3d画出来测试下就好
+输出：
+处理完后的CT图像，二维
+'''
+def get_segmented_lungs(im, plot=False):
+    
+    '''
+    This funtion segments the lungs from the given 2D slice.
+    '''
+    if plot == True:
+        f, plots = plt.subplots(8, 1, figsize=(5, 40))
+    #Step 1: Convert into a binary image. 
+    binary = im < 604
+    if plot == True:
+        plots[0].axis('off')
+        plots[0].imshow(binary, cmap=plt.cm.bone) 
+    '''
+    Step 2: Remove the blobs connected to the border of the image.
+    '''
+    cleared = clear_border(binary)
+    if plot == True:
+        plots[1].axis('off')
+        plots[1].imshow(cleared, cmap=plt.cm.bone) 
+    '''
+    Step 3: Label the image.
+    '''
+    label_image = label(cleared)
+    if plot == True:
+        plots[2].axis('off')
+        plots[2].imshow(label_image, cmap=plt.cm.bone) 
+
+    '''
+    Step 4: Keep the labels with 2 largest areas.
+    '''
+    areas = [r.area for r in regionprops(label_image)]
+    areas.sort()
+    if len(areas) > 2:
+        for region in regionprops(label_image):
+            if region.area < areas[-2]:
+                for coordinates in region.coords:                
+                       label_image[coordinates[0], coordinates[1]] = 0
+    binary = label_image > 0
+    if plot == True:
+        plots[3].axis('off')
+        plots[3].imshow(binary, cmap=plt.cm.bone) 
+    '''
+    Step 5: Erosion operation with a disk of radius 2. This operation is 
+    seperate the lung nodules attached to the blood vessels.
+    '''
+    selem = disk(2)
+    binary = binary_erosion(binary, selem)
+    if plot == True:
+        plots[4].axis('off')
+        plots[4].imshow(binary, cmap=plt.cm.bone) 
+    '''
+    Step 6: Closure operation with a disk of radius 10. This operation is 
+    to keep nodules attached to the lung wall.
+    '''
+    selem = disk(10)
+    binary = binary_closing(binary, selem)
+    if plot == True:
+        plots[5].axis('off')
+        plots[5].imshow(binary, cmap=plt.cm.bone) 
+    '''
+    Step 7: Fill in the small holes inside the binary mask of lungs.
+    '''
+    edges = roberts(binary)
+    binary = ndi.binary_fill_holes(edges)
+    if plot == True:
+        plots[6].axis('off')
+        plots[6].imshow(binary, cmap=plt.cm.bone) 
+    '''
+    Step 8: Superimpose the binary mask on the input image.
+    '''
+    get_high_vals = binary == 0
+    im[get_high_vals] = 0
+    if plot == True:
+        plots[7].axis('off')
+        plots[7].imshow(im, cmap=plt.cm.bone) 
+        
+    return im
 
         
 '''
@@ -98,6 +204,9 @@ def main(file_dir):
         for i in file_name_l2:
             file_name=dir_path+conf.separate+i  #文件名
             image,origin,spacing=reader.load_image(file_name)
+
+            image=segment_lung_from_ct_scan(image)  #产生mask提取肺部，删除杂质信息（空气、脊柱等）
+
             CT_name=i[:-4]#得到CT实例名字
             cand_list=np.asarray(candidates.loc[candidates['seriesuid']==CT_name])
             cand_list=np.asarray([cand_list[:,3],cand_list[:,2],cand_list[:,1]],dtype=float).T

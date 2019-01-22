@@ -30,6 +30,13 @@ class Config(object):
     '''
     separate='\\'                   #文件路径的分隔符，windows \\ linux\
     
+                                    #发送人必须是QQ邮箱账号
+    username = 'komo.tan@foxmail.com'        #发送人邮箱账号
+    password='mvvimofoqhtogege'                  #发送人邮箱密码
+
+    email_list=receiver=['1035844563@qq.com',] 
+                                    #收件人邮箱，163邮箱之类的都可
+
     pass
 
 
