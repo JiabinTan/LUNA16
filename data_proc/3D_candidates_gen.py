@@ -307,7 +307,8 @@ def main(file_dir):
     csv_path=conf.scv_dir+'candidates.csv'
     candidates=reader.read_csv(csv_path)
 
-    
+    data_set=[]
+    label_set=[]
     count=0
     if(not file_names_l1):
         print('no files')
@@ -339,8 +340,7 @@ def main(file_dir):
             #得到3D图像数据，数据大小可以制定，默认36*48*48
             crop_data=get_3D_candidate(image,origin,spacing,voxel_coord,class_y)
             
-            data_set=[]
-            label_set=[]
+            
             save_name='3D_data_'#保存路径加文件名，如果没有路径，保存到当前文件夹下，这边为了方便直接保存在当前文件夹了
             is_test = True #是否测试
             if not is_test:
@@ -373,11 +373,6 @@ def main(file_dir):
                         pass
                     count+=1
                     pass
-
-                if((count%1001)==0):
-                    dir=save_name+str(int(count/1000)+1)
-                    tfrd.writer(data_set,label_set,dir)
-                    pass
                 pass
             else:
                 x=0
@@ -399,8 +394,9 @@ def main(file_dir):
                 pass
             if is_test:
                 break
-
-
+    dir=save_name+str(int(count/1000)+1)
+    tfrd.writer(data_set,label_set,dir)
+ 
 
 if __name__=='__main__':
     # print(os.listdir(sys.path.append('..//')))

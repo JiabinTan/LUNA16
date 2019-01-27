@@ -1,3 +1,4 @@
+#1/27 : 2 PM
 #import numpy as np
 #from skimage.segmentation import clear_border
 #from skimage.measure import label,regionprops, perimeter
@@ -160,13 +161,23 @@
 #plt.show()
 #segment_lung_from_ct_scan(scan[14:])
 ##segmented_lungs = segment_lung_mask(scan, False)
-
-#from TFRecord_proc import TFRecord as tfrd
-import numpy as np
-data_set=np.load('3d_data.npy')
-label_set=np.load('label.npy')
-print(data_set.shape)
-print(label_set.shape)
-print(data_set.dtype)
-#dir='test.tfrecords'
-#tfrd.writer(data_set,label_set,dir)
+'''
+1/27 : 2 PM
+'''
+##from TFRecord_proc import TFRecord as tfrd
+#import numpy as np
+#data_set=np.load('3d_data.npy')
+#label_set=np.load('label.npy')
+#print(data_set.shape)
+#print(label_set.shape)
+#print(data_set.dtype)
+##dir='test.tfrecords'
+##tfrd.writer(data_set,label_set,dir)
+'''
+1/27 : 10 PM
+'''
+def func():
+    for i in range(5):
+        yield i
+for i in func():
+    print(i)
