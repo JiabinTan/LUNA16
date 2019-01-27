@@ -1,6 +1,8 @@
 #!/usr/bin/python2.6  
 # -*- coding: utf-8 -*-
 import tensorflow as tf
+import numpy as np
+
 '''
 读写tfrecord文件
 '''
@@ -19,15 +21,18 @@ class TFRecord(object):
     '''
     def writer(data,label,dir):
         writer = tf.python_io.TFRecordWriter(dir)
-        img_raw = data.tostring()
-        example = tf.train.Example(features=tf.train.Features(feature={
-            "label": tf.train.Feature(int64_list=tf.train.Int64List(value=[label])),
-            'img_raw': tf.train.Feature(bytes_list=tf.train.BytesList(value=[img_raw]))
-        }))
+        for index,value in enumerate(data):
+            
+            img_raw = value.tostring()
+            example = tf.train.Example(features=tf.train.Features(feature={
+                "label": tf.train.Feature(int64_list=tf.train.Int64List(value=[label[index]])),
+                'img_raw': tf.train.Feature(bytes_list=tf.train.BytesList(value=[img_raw]))
+            }))
 
-        writer.write(example.SerializeToString())  #序列化为字符串
+            writer.write(example.SerializeToString())  #序列化为字符串
+            
+            pass
         writer.close()
-
         pass
     '''
     tfrecord读取器
@@ -41,7 +46,7 @@ class TFRecord(object):
     x_size=48 x的大小
     '''
     def reader(tfrecords_filename,is_batch=False,is_shuffle=False,batch_size=32,z_size=36,y_size=48,x_size=48):
-        filename_queue = tf.train.string_input_producer([tfrecords_filename])
+        filename_queue = tf.train.string_input_producer(tfrecords_filename)
         reader = tf.TFRecordReader()
         _, serialized_example = reader.read(filename_queue)   #返回文件名和文件
         features = tf.parse_single_example(serialized_example,
