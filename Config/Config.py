@@ -24,7 +24,8 @@ class Config(object):
     data_size=754975                    #V2版本中提供了754，975条训练数据，V1提供了551，065条，这边默认使用V2，毕竟数据比较多
     epoch=250                           #训练的轮数，体现在我们训练的for循环次数为  epoch*data_size/batch_size 
     save_dir='..\\model_save\\my_model_weights.h5'
-    SWA = False                         #是否使用SWA lr decay schedule
+    #SWA = False                         #是否使用SWA lr decay schedule
+    cos = False                         #是否使用 cosine_decay_restarts ：https://arxiv.org/abs/1608.03983
     '''
     其他
     '''

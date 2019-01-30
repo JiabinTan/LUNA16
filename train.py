@@ -50,17 +50,22 @@ def focal_loss(target_tensor,prediction_tensor,  weights=None, alpha=0.9, gamma=
 '''
 lr decay schedule
 SWA schedule :https://github.com/timgaripov/swa/blob/master/train.py
+swa IS abandoned for it's need two model
+
+noisy_linear_cosine_decay : 
 '''
 def schedule(epoch):
-    t = (epoch) / (args.swa_start if args.swa else args.epochs)
-    lr_ratio = args.swa_lr / args.lr_init if args.swa else 0.01
-    if t <= 0.5:
-        factor = 1.0
-    elif t <= 0.9:
-        factor = 1.0 - (1.0 - lr_ratio) * (t - 0.5) / 0.4
-    else:
-        factor = lr_ratio
-    return args.lr_init * factor
+
+    learning_rate = tf.train.cosine_decay_restarts(
+                                                    learning_rate=0.001,
+                                                    global_step=epoch,
+                                                    first_decay_steps=400,
+                                                    t_mul=1.5,
+                                                    m_mul=0.8,
+                                                    alpha=0.0,
+                                                    name=None
+                                                )
+    return learning_rate
 
 if __name__=='__main__':
     '''
@@ -111,7 +116,7 @@ if __name__=='__main__':
     model.compile(loss=focal_loss,
               optimizer=tf.train.AdamOptimizer,
               metrics=['accuracy'])
-    if conf.SWA:
+    if conf.cos:
         lrate = LearningRateScheduler(schedule)
         pass
     early_stopping = EarlyStopping(monitor='val_loss', patience=20, verbose=2)
@@ -126,7 +131,7 @@ if __name__=='__main__':
 
     the number of valid batches - 20 because of 50(valid batch_size)*20(valid total batches)=1000(1 tfrecord file)
     '''
-    if conf.SWA:
+    if conf.cos:
         model.fit(train_dataset, epochs=conf.epoch, steps_per_epoch=100,
             validation_data=val_dataset,validation_steps=20,
             callbacks=[lrate,early_stopping])
