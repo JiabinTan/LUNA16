@@ -74,7 +74,7 @@ if __name__=='__main__':
     train_tfrecords_filename = ['test.tfrecords',] #训练集文件位置
     train_images,train_labels=tfrd.reader(train_tfrecords_filename,is_batch=True,batch_size=conf.batch_size)
     train_labels=tf.one_hot(train_labels,2)
-    train_dataset=tf.data.Dataset.zip((train_images, train_labels)) 
+    #train_dataset=tf.data.Dataset.zip((train_images, train_labels)) 
     '''
     测试集数据
     测试下，这两个数据集是不是有问题。我怕后面重新调用这个函数后，可能前面的数据集会出问题
@@ -82,7 +82,7 @@ if __name__=='__main__':
     eval_tfrecords_filename = ['test.tfrecords',] #测试集文件位置
     eval_images,eval_labels=tfrd.reader(eval_tfrecords_filename,is_batch=True,batch_size=50)
     eval_labels=tf.one_hot(eval_labels,2)
-    eval_dataset=tf.data.Dataset.zip((eval_images, eval_labels))
+    #eval_dataset=tf.data.Dataset.zip((eval_images, eval_labels))
 
     '''
     验证集数据
@@ -91,7 +91,7 @@ if __name__=='__main__':
     val_tfrecords_filename = ['test.tfrecords',] #测试集文件位置
     val_images,val_labels=tfrd.reader(val_tfrecords_filename,is_batch=True,batch_size=50)
     val_labels=tf.one_hot(val_labels,2)
-    val_dataset=tf.data.Dataset.zip((val_images, val_labels))
+    #val_dataset=tf.data.Dataset.zip((val_images, val_labels))
 
 
     '''
@@ -99,13 +99,12 @@ if __name__=='__main__':
     类似于占位
     '''
 
-    xs = tf.keras.layers.Input((36,48,48,1))
-    ys = tf.keras.layers.Input((2,))
+    xs = tf.keras.layers.Input(train_images)
     '''
     调用模型
     '''
 
-    model=mymodel_(xs,ys)#这边需要一个model class，返回的是一个keras model
+    model=mymodel_(xs,eval_labels)#这边需要一个model class，返回的是一个keras model
     if os.path.exists(conf.save_dir):
         model.load_weights(conf.save_dir)
 
@@ -115,11 +114,16 @@ if __name__=='__main__':
     '''
     model.compile(loss=focal_loss,
               optimizer=tf.train.AdamOptimizer,
-              metrics=['accuracy'])
+              metrics=['accuracy'],
+              target_tensors=train_labels)
     if conf.cos:
         lrate = LearningRateScheduler(schedule)
         pass
     early_stopping = EarlyStopping(monitor='val_loss', patience=20, verbose=2)
+
+
+    coord=tf.train.Coordinator()
+    threads= tf.train.start_queue_runners(coord=coord)
     '''
     training 
     validation
@@ -132,24 +136,28 @@ if __name__=='__main__':
     the number of valid batches - 20 because of 50(valid batch_size)*20(valid total batches)=1000(1 tfrecord file)
     '''
     if conf.cos:
-        model.fit(train_dataset, epochs=conf.epoch, steps_per_epoch=100,
-            validation_data=val_dataset,validation_steps=20,
+        model.fit(epochs=conf.epoch, steps_per_epoch=100,
+            validation_data=(val_images,val_labels),validation_steps=20,
             callbacks=[lrate,early_stopping])
         pass
     else:
-        model.fit(train_dataset, epochs=conf.epoch, steps_per_epoch=100,
-            validation_data=val_dataset,validation_steps=20,
+        model.fit(epochs=conf.epoch, steps_per_epoch=100,
+            validation_data=(val_images,val_labels),validation_steps=20,
             callbacks=[early_stopping])
         pass
     '''
     测试性能
     when training done , evaluate on test set(batch_size=50,total batches=20.I assume that we just choose 1 file with 1000 datas)
     '''
-    model.evaluate(eval_dataset, steps=20)
+    model.evaluate(eval_images,eval_labels, steps=20)
     '''
     last save the model
     I need to know what is saved.So, send me the h5 file
     '''
+    coord.request_stop()
+    coord.join(threads)
+
+
     model.save_weights(conf.save_dir)
     '''
     traning done 
