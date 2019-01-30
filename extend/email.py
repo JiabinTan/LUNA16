@@ -24,13 +24,15 @@ class Email(object):
         self.smtp.login(conf.username, conf.password) 
         return super().__init__(*args, **kwargs)
     
-    def send(self):
-        subject = '训练完成！（training done notice）'
+    def send(self,
+             subj='训练完成！（training done notice）',
+             message='Here is LUNA16 Program（Jiabin）!\n now,you Training process is done!\n Go and Start next Jobs.\n                           ---yours.'):
+        subject = subj
         msg = MIMEMultipart('mixed') 
         msg['Subject'] = subject
         msg['From'] = 'komo.tan@foxmail.com <komo.tan@foxmail.com>'
         msg['To'] = ";".join(conf.email_list) 
-        text = "Here is LUNA16 Program（Jiabin）!\n now,you Training process is done!\n Go and Start next Jobs.\n                           ---yours."    
+        text = message 
         text_plain = MIMEText(text,'plain', 'utf-8')    
         msg.attach(text_plain) 
         self.smtp.sendmail('komo.tan@foxmail.com', conf.email_list, msg.as_string())

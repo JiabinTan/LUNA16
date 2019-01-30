@@ -19,6 +19,10 @@ if __name__=='__main__':
     #记录下来，避免因为这些小细节导致后面代码大批量的重写
     images,labels=tfrd.reader(tfrecords_filename,is_batch=True,batch_size=2)
 
+    tfrecords_filename = ['test.tfrecords',]
+    #d单个读取，随便测试下batch读取，记录下两者的差别，特别是shape，也就是维度的差别
+    #记录下来，避免因为这些小细节导致后面代码大批量的重写
+    images_2,labels_2=tfrd.reader(tfrecords_filename,is_batch=True,batch_size=3)
     with tf.Session() as sess: #开始一个会话
         #之前我做过测试，不初始化读取器也是可以运行的，应该是没有tf变量吧
         #这边还是初始化写者吧，当做模板，因为之后训练肯定是有变量的，需要初始化
@@ -29,15 +33,19 @@ if __name__=='__main__':
         try:
             #for i in range(math.ceil(conf.epoch*conf.data_size/conf.batch_size)):
             for i in range(4):
-                example, l = sess.run([images,labels])#在会话中取出image和label
+                example, l ,example_2,l_2= sess.run([images,labels,images_2,labels_2])#在会话中取出image和label
                 '''
                 这边就可以对图片数据跟label数据进行处理了，比如测试阶段的查看3D图
                 训练阶段的feed data操作
                 '''
                 print(example.shape)
                 print(l)
-                print(example[:,3:5,5:6,5:6])
-
+                print(example[:,3,5:6,5:6])
+                print('=====')
+                print(example_2.shape)
+                print(l_2)
+                print(example_2[:,3,5:6,5:6])
+                print('=====')
         except tf.errors.OutOfRangeError:
             print('Done Train...')
         finally:
