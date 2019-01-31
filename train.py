@@ -19,12 +19,6 @@ from CNN import CNN_3d
 
 from tf.keras.callbacks import ModelCheckpoint
 
-'''
-output messages to file
-not display on screen
-'''
-
-
 
 
 '''
@@ -241,7 +235,10 @@ if __name__=='__main__':
     model.compile(loss=focal_loss,
               metrics=['accuracy'])
     test_loss=model.evaluate(eval_images,eval_labels, steps=20)
-    
+    '''
+    output messages to file
+    not display on screen
+    '''
     bk=sys.stdout
     log_file = open("./logs/test_loss.log", "w")
     sys.stdout = log_file
