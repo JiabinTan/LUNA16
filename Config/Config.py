@@ -26,6 +26,7 @@ class Config(object):
     save_dir='..\\model_save\\my_model_weights.h5'
     #SWA = False                         #是否使用SWA lr decay schedule
     cos = False                         #是否使用 cosine_decay_restarts ：https://arxiv.org/abs/1608.03983
+    ckp_dir='..\\cpk\\weight_best.hdf5'
     '''
     其他
     '''

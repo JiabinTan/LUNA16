@@ -14,15 +14,16 @@ from tensorflow.python.ops import array_ops
 import math
 from tf.keras.callbacks import EarlyStopping
 from extend.email import Email
-from keras.callbacks import LearningRateScheduler
+from tf.keras.callbacks import LearningRateScheduler
 from CNN import CNN_3d
+
+from tf.keras.callbacks import ModelCheckpoint
 
 '''
 output messages to file
 not display on screen
 '''
-log_file = open("message.log", "w")
-sys.stdout = log_file
+
 
 
 
@@ -78,6 +79,46 @@ def schedule(epoch):
                                                 )
     return learning_rate
 
+
+'''
+日志记录
+'''
+class LossHistory(keras.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        self.losses = {'batch':[], 'epoch':[]}
+        self.accuracy = {'batch':[], 'epoch':[]}
+        self.val_loss = {'batch':[], 'epoch':[]}
+        self.val_acc = {'batch':[], 'epoch':[]}
+
+    #def on_batch_end(self, batch, logs={}):
+    #    self.losses['batch'].append(logs.get('loss'))
+    #    self.accuracy['batch'].append(logs.get('acc'))
+    #    self.val_loss['batch'].append(logs.get('val_loss'))
+    #    self.val_acc['batch'].append(logs.get('val_acc'))
+
+    def on_epoch_end(self, batch, logs={}):
+        self.losses['epoch'].append(logs.get('loss'))
+        self.accuracy['epoch'].append(logs.get('acc'))
+        self.val_loss['epoch'].append(logs.get('val_loss'))
+        self.val_acc['epoch'].append(logs.get('val_acc'))
+
+    def log(self):
+        bk=sys.stdout
+        log_file = open("./logs/train_message.log", "w")
+        sys.stdout = log_file
+        iters = range(len(self.losses[loss_type]))
+        for i in iters:
+            print('====epoch '+str(i)+'=====')
+            print('==train loss==')
+            print(self.losses['epoch'][i])
+            print('==train acc==')
+            print(self.accuracy['epoch'][i])
+            print('==val loss==')
+            print(self.val_loss['epoch'][i])
+            print('==val acc==')
+            print(self.val_acc['epoch'][i])
+        sys.stdout=bk
+        
 if __name__=='__main__':
     '''
     训练数据
@@ -152,17 +193,27 @@ if __name__=='__main__':
 
     the number of valid batches - 20 because of 50(valid batch_size)*20(valid total batches)=1000(1 tfrecord file)
     '''
+    history = LossHistory()
+    
+    checkpointer = ModelCheckpoint(filepath=conf.ckp_dir,
+                                    monitor='val_loss',
+                                    verbose=0,
+                                    save_best_only=True,
+                                    save_weights_only=True,
+                                    mode='min',
+                                    period=1)
+
     if conf.cos:
         model.fit(epochs=conf.epoch, steps_per_epoch=100,
             validation_data=(val_images,val_labels),validation_steps=20,
-            callbacks=[lrate,early_stopping])
+            callbacks=[lrate,early_stopping,history,checkpointer])
         pass
     else:
         model.fit(epochs=conf.epoch, steps_per_epoch=100,
             validation_data=(val_images,val_labels),validation_steps=20,
-            callbacks=[early_stopping])
+            callbacks=[early_stopping,history,checkpointer])
         pass
-    
+    history.log()
     '''
     last save the model
     I need to know what is saved.So, send me the h5 file
@@ -189,8 +240,14 @@ if __name__=='__main__':
         pass
     model.compile(loss=focal_loss,
               metrics=['accuracy'])
-    model.evaluate(eval_images,eval_labels, steps=20)
-
+    test_loss=model.evaluate(eval_images,eval_labels, steps=20)
+    
+    bk=sys.stdout
+    log_file = open("./logs/test_loss.log", "w")
+    sys.stdout = log_file
+    print('===test set loss===')
+    print(test_loss)
+    sys.stdout=bk
 
     coord.request_stop()
     coord.join(threads)
