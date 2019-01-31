@@ -15,7 +15,12 @@ LUNA16 competition repository
 │  ├─test.py                  测试一些模块的测试文件，因为模块我这边不能直接运行
 │  └─3D_candidates_gen.py	  3D训练数据生成物文件
 │
-└─extend
-   ├─email.py                 邮件发送模块（为了简化配置文件，发送内容之类的已经写死，如果需要我再改）
-   └
+├─extend
+│  └─email.py                 邮件发送模块（为了简化配置文件，发送内容之类的已经写死，如果需要我再改）
+│
+├─cpk                         checkpointer 文件保存位置
+├─log                         训练日志保存位置
+├─model_save                  模型保存位置
+├─CNN.py                      网络结构文件
+└─train.py                    训练驱动文件，类似于训练入口文件
 ~~~
