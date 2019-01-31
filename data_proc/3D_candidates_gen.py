@@ -55,10 +55,14 @@ def get_3D_candidate(image,origin,spacing,candidates,ys,z_pad=36,y_pad=48,x_pad=
         data=np.zeros((z_pad,y_pad,x_pad),dtype=np.int16)
         #原图中截取候选区
         crop_cube=image[z_index_min:z_index_max,y_index_min:y_index_max,x_index_min:x_index_max]
+        z_flag=(z_index_max-z_index_min)==36 #判断是否缺少
+        y_flag=(y_index_max-y_index_min)==48
+        x_flag=(x_index_max-x_index_min)==48
+
         #判断是否只是截取了一部分，用0填充
-        if(z_index_min==0): 
-            if(y_index_min==0):
-                if(x_index_min==0):
+        if((z_index_min==0) and (not z_flag)): 
+            if((y_index_min==0) and (not y_flag)):
+                if((x_index_min==0) and (not x_flag)):
                     # z front y front x front
                     data[:-z_pad+(z_index_max-z_index_min),:-y_pad+(y_index_max-y_index_min),:-x_pad+(x_index_max-x_index_min)]=crop_cube
                     pass

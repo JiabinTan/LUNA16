@@ -15,6 +15,17 @@ import math
 from tf.keras.callbacks import EarlyStopping
 from extend.email import Email
 from keras.callbacks import LearningRateScheduler
+from CNN import CNN_3d
+
+'''
+output messages to file
+not display on screen
+'''
+log_file = open("message.log", "w")
+sys.stdout = log_file
+
+
+
 '''
 focal loss function
 '''
@@ -103,8 +114,14 @@ if __name__=='__main__':
     '''
     调用模型
     '''
+   # import #这边会倒入你的文件
 
-    model=mymodel_(xs,eval_labels)#这边需要一个model class，返回的是一个keras model
+    #这边调用class
+    CNN=CNN_3d(xs,is_training=True,keep_prob=0.9)
+    #这边产生model、
+
+    model=CNN.cnn()
+    m#odel=mymodel_(xs,eval_labels)#这边需要一个model class，返回的是一个keras model
     if os.path.exists(conf.save_dir):
         model.load_weights(conf.save_dir)
 
@@ -145,20 +162,38 @@ if __name__=='__main__':
             validation_data=(val_images,val_labels),validation_steps=20,
             callbacks=[early_stopping])
         pass
-    '''
-    测试性能
-    when training done , evaluate on test set(batch_size=50,total batches=20.I assume that we just choose 1 file with 1000 datas)
-    '''
-    model.evaluate(eval_images,eval_labels, steps=20)
+    
     '''
     last save the model
     I need to know what is saved.So, send me the h5 file
     '''
-    coord.request_stop()
-    coord.join(threads)
+    
 
 
     model.save_weights(conf.save_dir)
+
+
+    '''
+    测试性能
+    when training done , evaluate on test set(batch_size=50,total batches=20.I assume that we just choose 1 file with 1000 datas)
+    '''
+    xs = tf.keras.layers.Input(eval_images)
+    #这边调用class
+    CNN=CNN_3d(xs,is_training=False,keep_prob=0.9)
+    #这边产生model、
+
+    model=CNN.cnn()
+    m#odel=mymodel_(xs,eval_labels)#这边需要一个model class，返回的是一个keras model
+    if os.path.exists(conf.save_dir):
+        model.load_weights(conf.save_dir)
+        pass
+    model.compile(loss=focal_loss,
+              metrics=['accuracy'])
+    model.evaluate(eval_images,eval_labels, steps=20)
+
+
+    coord.request_stop()
+    coord.join(threads)
     '''
     traning done 
     send email to admin

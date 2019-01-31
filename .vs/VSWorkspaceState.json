@@ -3,8 +3,9 @@
     "",
     "\\Config",
     "\\data_proc",
-    "\\extend"
+    "\\extend",
+    "\\model_save"
   ],
-  "SelectedNode": "\\data_proc\\data_read_demo.py",
+  "SelectedNode": "\\train.py",
   "PreviewInSolutionExplorer": false
 }
