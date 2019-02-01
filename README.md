@@ -16,8 +16,8 @@ LUNA16 competition repository
 │  └─3D_candidates_gen.py	  3D训练数据生成物文件
 │
 ├─extend
+│  ├─3Dplot                   画3D图像
 │  └─email.py                 邮件发送模块（为了简化配置文件，发送内容之类的已经写死，如果需要我再改）
-│
 ├─cpk                         checkpointer 文件保存位置
 ├─log                         训练日志保存位置
 ├─model_save                  模型保存位置

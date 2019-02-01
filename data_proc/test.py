@@ -176,8 +176,14 @@
 '''
 1/27 : 10 PM
 '''
-def func():
-    for i in range(5):
-        yield i
-for i in func():
-    print(i)
+#def func():
+#    for i in range(5):
+#        yield i
+#for i in func():
+#    print(i)
+'''
+1/2/2019
+'''
+# -*- coding:utf-8 -*-
+
+

@@ -1,11 +1,7 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Config",
-    "\\data_proc",
-    "\\extend",
-    "\\model_save"
+    "\\data_proc"
   ],
-  "SelectedNode": "\\train.py",
   "PreviewInSolutionExplorer": false
 }
