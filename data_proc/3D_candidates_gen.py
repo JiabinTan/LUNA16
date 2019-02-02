@@ -5,9 +5,11 @@ import sys
 sys.path.append('..//')
 from Config.Config import Config as conf
 import re
+
 from data_proc import reader_disp as reader
 import numpy as np
 from TFRecord_proc import TFRecord as tfrd
+from data_aug import augmentate
 
 from skimage.segmentation import clear_border
 from skimage.measure import label,regionprops, perimeter
@@ -349,33 +351,74 @@ def main(file_dir):
             is_test = True #是否测试
             if not is_test:
                 for data,label in crop_data:
-                    if((count%1000==0)):
-                        if(count!=0):
-                            '''
-                            注意读取数据的时候为
-                            set=np.load(path)
-                            data=set[()][0]
-                            label=set[()][1]
-                            '''
-                            #np.save(save_name+str(int(count/1000)),np.array([data_set,label_set]))
+                    if label==1:
+                        for i in range(100):
+                            
+                            data=data[np.newaxis,:]
+                            data=(data+1200)/1800
+                            #转化为float32 可以加速后面的增强速度
+                            data=data.astype(np.float32)
+                            data=augmentate(data)
+                            data=data*1800-1200
+                            data=data.astype(np.int16)
 
-                            dir=save_name+str(int(count/1000))
-                            tfrd.writer(data_set,label_set,dir)
+                            if((count%1000==0)):
+                                if(count!=0):
+                                    '''
+                                    注意读取数据的时候为
+                                    set=np.load(path)
+                                    data=set[()][0]
+                                    label=set[()][1]
+                                    '''
+                                    #np.save(save_name+str(int(count/1000)),np.array([data_set,label_set]))
+                                    
+                                    dir=save_name+str(int(count/1000))
+                                    tfrd.writer(data_set,label_set,dir)
 
-                            data_set=np.array([data])
-                            label_set=np.array([label])
+                                    data_set=np.array([data])
+                                    label_set=np.array([label])
+                                    pass
+                                else:
+                                    data_set=np.array([data])
+                                    label_set=np.array([label])
+                                    pass
+                                pass
+                            else:
+                                data_set=np.insert(data_set,1,data,axis=0)
+                                label_set=np.insert(label_set,1,label,axis=0)
+                                pass
+                            count+=1
                             pass
+                        pass                        
+                    else:
+                        if((count%1000==0)):
+                            if(count!=0):
+                                '''
+                                注意读取数据的时候为
+                                set=np.load(path)
+                                data=set[()][0]
+                                label=set[()][1]
+                                '''
+                                #np.save(save_name+str(int(count/1000)),np.array([data_set,label_set]))
+                            
+                                dir=save_name+str(int(count/1000))
+                                tfrd.writer(data_set,label_set,dir)
+
+                                data_set=np.array([data])
+                                label_set=np.array([label])
+                                pass
+
+                            else:
+                                data_set=np.array([data])
+                                label_set=np.array([label])
+                                pass
 
                         else:
-                            data_set=np.array([data])
-                            label_set=np.array([label])
+                            data_set=np.insert(data_set,1,data,axis=0)
+                            label_set=np.insert(label_set,1,label,axis=0)
                             pass
-
-                    else:
-                        data_set=np.insert(data_set,1,data,axis=0)
-                        label_set=np.insert(label_set,1,label,axis=0)
+                        count+=1
                         pass
-                    count+=1
                     pass
                 pass
             else:
@@ -398,6 +441,8 @@ def main(file_dir):
                 pass
             if is_test:
                 break
+            pass
+        pass
     dir=save_name+str(int(count/1000)+1)
     tfrd.writer(data_set,label_set,dir)
  

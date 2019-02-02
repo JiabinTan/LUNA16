@@ -18,7 +18,7 @@ from tf.keras.callbacks import LearningRateScheduler
 from CNN import CNN_3d
 
 from tf.keras.callbacks import ModelCheckpoint
-
+from data_aug import augmentate
 
 
 '''
@@ -120,6 +120,12 @@ if __name__=='__main__':
     train_tfrecords_filename = ['test.tfrecords',] #训练集文件位置
     train_images,train_labels=tfrd.reader(train_tfrecords_filename,is_batch=True,batch_size=conf.batch_size)
     train_labels=tf.one_hot(train_labels,2)
+
+    
+    train_images=(train_images+1200)/1800
+    train_images=train_images.astype(np.float32)
+    train_images=augmentate(train_images,False)
+
     #train_dataset=tf.data.Dataset.zip((train_images, train_labels)) 
     '''
     测试集数据
@@ -128,6 +134,10 @@ if __name__=='__main__':
     eval_tfrecords_filename = ['test.tfrecords',] #测试集文件位置
     eval_images,eval_labels=tfrd.reader(eval_tfrecords_filename,is_batch=True,batch_size=50)
     eval_labels=tf.one_hot(eval_labels,2)
+
+    eval_images=(eval_images+1200)/1800
+    eval_images=eval_images.astype(np.float32)
+    eval_images=augmentate(eval_images,False)
     #eval_dataset=tf.data.Dataset.zip((eval_images, eval_labels))
 
     '''
@@ -137,6 +147,10 @@ if __name__=='__main__':
     val_tfrecords_filename = ['test.tfrecords',] #测试集文件位置
     val_images,val_labels=tfrd.reader(val_tfrecords_filename,is_batch=True,batch_size=50)
     val_labels=tf.one_hot(val_labels,2)
+
+    val_images=(val_images+1200)/1800
+    val_images=val_images.astype(np.float32)
+    val_images=augmentate(val_images,False)
     #val_dataset=tf.data.Dataset.zip((val_images, val_labels))
 
 
