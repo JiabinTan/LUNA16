@@ -13,6 +13,7 @@ LUNA16 competition repository
 │  ├─data_read_demo.py        tfrecord文件读取demo
 │  ├─TFRecord_proc.py         TFreord文件处理（读写）
 │  ├─test.py                  测试一些模块的测试文件，因为模块我这边不能直接运行
+│  ├─data_aug.py              数据增强文件
 │  └─3D_candidates_gen.py	  3D训练数据生成物文件
 │
 ├─extend
