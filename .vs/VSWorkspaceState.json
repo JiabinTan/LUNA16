@@ -1,9 +1,10 @@
 {
   "ExpandedNodes": [
     "",
+    "\\Config",
     "\\data_proc",
     "\\extend"
   ],
-  "SelectedNode": "\\README.md",
+  "SelectedNode": "\\data_proc\\data_aug.py",
   "PreviewInSolutionExplorer": false
 }

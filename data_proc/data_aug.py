@@ -19,7 +19,7 @@ def random_flip_FB(data,flip_prop=0.5):
             pass
         pass
 
-def random_rotate(data,rotate_prop):
+def random_rotate(data,rotate_prop=0.5):
     if flip_prop<np.random.uniform(low=0.0, high=1.0):
         return data
     else:
@@ -58,12 +58,20 @@ data:输入数据
 返回增强后的数据
 '''
 
-def augmentate(data,is_gen=True):
+def augmentate(data,
+               is_gen=True, #是否是生成数据的时候在调用
+               flip_prop=0.4,#z轴翻转概率
+               rotate_prop=0.5,#旋转概率
+               fraction_x=0.9,#剪裁保留百分比axis-0
+               fraction_y=0.9,#剪裁保留百分比axis-1
+               keep_prop=0.8,#裁剪发生概率
+               crop_height=48, #裁剪后的高度
+               crop_width=48):#裁剪后的宽度
     '''
     数据增强
     '''
     data=np.array(data)
-    data=random_flip_FB(data,0.4)
+    data=random_flip_FB(data,flip_prop)
     '''
     通道转换
     '''
@@ -81,15 +89,21 @@ def augmentate(data,is_gen=True):
     '''
     rotation 
     '''
-    data=random_rotate(data)
+    data=random_rotate(data,rotate_prop)
     '''
     crop & resize
     '''
     if(is_gen):
-        data=tf.image.crop_resize(data,batch_size=1)
+        data=tf.image.crop_resize(data,fraction_x,fraction_y,keep_prop,crop_height, crop_width)
         pass
     else:
         data=tf.image.crop_resize(data)
+    if(np.size(data.shape)==3):
+        data=data.tranpose((2,1,0))
+        pass
+    else:
+        data=data.transpose((0,3,2,1))
+        pass
     return data
 
 
