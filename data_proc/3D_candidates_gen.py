@@ -39,163 +39,177 @@ x_pad:需要的x方向的大小
 
 一个z_pad*y_pad*x_pad大小的数据块
 '''
-def get_3D_candidate(image,origin,spacing,candidates,ys,z_pad=36,y_pad=48,x_pad=48):
-    for index,values in enumerate(candidates):
-        #提取label
-        label=ys[index]
-        width,height,length=image.shape[0],image.shape[1],image.shape[2]
-        z,y,x=values[0],values[1],values[2]
-        z_index_min=int(max(0,z-z_pad/2))
-        z_index_max=int(min(width-1,z+z_pad/2))
+def get_3D_candidate(image, origin, spacing, candidates, ys, z_pad=36, y_pad=48, x_pad=48):
+    for index, values in enumerate(candidates):
+        # 提取label
+        label = ys[index]
+        width, height, length = image.shape[0], image.shape[1], image.shape[2]
+        z, y, x = values[0], values[1], values[2]
+        z_index_min = int(max(0, z - z_pad / 2))
+        z_index_max = int(min(width - 1, z + z_pad / 2))
 
-        y_index_min=int(max(0,y-y_pad/2))
-        y_index_max=int(min(height-1,y+y_pad/2))
-        
-        x_index_min=int(max(0,x-x_pad/2))
-        x_index_max=int(min(length-1,x+x_pad/2))
+        y_index_min = int(max(0, y - y_pad / 2))
+        y_index_max = int(min(height - 1, y + y_pad / 2))
 
-        data=np.zeros((z_pad,y_pad,x_pad),dtype=np.int16)
-        #原图中截取候选区
-        crop_cube=image[z_index_min:z_index_max,y_index_min:y_index_max,x_index_min:x_index_max]
-        z_flag=(z_index_max-z_index_min)==36 #判断是否缺少
-        y_flag=(y_index_max-y_index_min)==48
-        x_flag=(x_index_max-x_index_min)==48
+        x_index_min = int(max(0, x - x_pad / 2))
+        x_index_max = int(min(length - 1, x + x_pad / 2))
 
-        #判断是否只是截取了一部分，用0填充
-        if((z_index_min==0) and (not z_flag)): 
-            if((y_index_min==0) and (not y_flag)):
-                if((x_index_min==0) and (not x_flag)):
+        data = np.zeros((z_pad, y_pad, x_pad), dtype=np.int16)
+        # 原图中截取候选区
+        crop_cube = image[z_index_min:z_index_max, y_index_min:y_index_max, x_index_min:x_index_max]
+        # 判断是否只是截取了一部分，用0填充
+        z_flag = (z_index_max - z_index_min) == 36  # 判断是否缺少
+        y_flag = (y_index_max - y_index_min) == 48
+        x_flag = (x_index_max - x_index_min) == 48
+
+        # if z_flag and y_flag and x_flag:
+        #     # z ok y ok x ok
+        #     data[:, :, :] = crop_cube
+        #     yield data, label
+        if ((z_index_min == 0) and (not z_flag)):
+            if ((y_index_min == 0) and (not y_flag)):
+                if ((x_index_min == 0) and (not x_flag)):
                     # z front y front x front
-                    data[:-z_pad+(z_index_max-z_index_min),:-y_pad+(y_index_max-y_index_min),:-x_pad+(x_index_max-x_index_min)]=crop_cube
+                    data[:-z_pad + (z_index_max - z_index_min), :-y_pad + (y_index_max - y_index_min),
+                    :-x_pad + (x_index_max - x_index_min)] = crop_cube
                     pass
-                elif(x_index_max==length-1):
-                    #z front y front x back
-                    data[:-z_pad+(z_index_max-z_index_min),:-y_pad+(y_index_max-y_index_min),x_pad-(x_index_max-x_index_min):]=crop_cube
+                elif ((x_index_max == length - 1) and (not x_flag)):
+                    # z front y front x back
+                    data[:-z_pad + (z_index_max - z_index_min), :-y_pad + (y_index_max - y_index_min),
+                    x_pad - (x_index_max - x_index_min):] = crop_cube
                     pass
                 else:
                     # z front y front x ok
-                    data[:-z_pad+(z_index_max-z_index_min),:-y_pad+(y_index_max-y_index_min),:]=crop_cube
+                    data[:-z_pad + (z_index_max - z_index_min), :-y_pad + (y_index_max - y_index_min), :] = crop_cube
                     pass
                 pass
-            elif(y_index_max==height-1):   
-                if(x_index_min==0):
-                    #z front y back x front
-                    data[:-z_pad+(z_index_max-z_index_min),y_pad-(y_index_max-y_index_min):,:-x_pad+(x_index_max-x_index_min)]=crop_cube
+            elif ((y_index_max == height - 1) and (not y_flag)):
+                if ((x_index_min == 0) and (not x_flag)):
+                    # z front y back x front
+                    data[:-z_pad + (z_index_max - z_index_min), y_pad - (y_index_max - y_index_min):,
+                    :-x_pad + (x_index_max - x_index_min)] = crop_cube
                     pass
-                elif(x_index_max==length-1):
-                    #z front y back x back
-                    data[:-z_pad+(z_index_max-z_index_min),y_pad-(y_index_max-y_index_min):,x_pad-(x_index_max-x_index_min):]=crop_cube
+                elif ((x_index_max == length - 1) and (not x_flag)):
+                    # z front y back x back
+                    data[:-z_pad + (z_index_max - z_index_min), y_pad - (y_index_max - y_index_min):,
+                    x_pad - (x_index_max - x_index_min):] = crop_cube
                     pass
                 else:
-                    #z front y back x ok
-                    data[:-z_pad+(z_index_max-z_index_min),y_pad-(y_index_max-y_index_min):,:]=crop_cube
+                    # z front y back x ok
+                    data[:-z_pad + (z_index_max - z_index_min), y_pad - (y_index_max - y_index_min):, :] = crop_cube
                     pass
                 pass
-            else: 
-                if(x_index_min==0):
-                    #z front y ok x front
-                    data[:-z_pad+(z_index_max-z_index_min),:,:-x_pad+(x_index_max-x_index_min)]=crop_cube
+            else:
+                if ((x_index_min == 0) and (not x_flag)):
+                    # z front y ok x front
+                    data[:-z_pad + (z_index_max - z_index_min), :, :-x_pad + (x_index_max - x_index_min)] = crop_cube
                     pass
-                elif(x_index_max==length-1):
-                    #z front y ok x back
-                    data[:-z_pad+(z_index_max-z_index_min),:,x_pad-(x_index_max-x_index_min):]=crop_cube
+                elif ((x_index_max == length - 1) and (not x_flag)):
+                    # z front y ok x back
+                    data[:-z_pad + (z_index_max - z_index_min), :, x_pad - (x_index_max - x_index_min):] = crop_cube
                     pass
                 else:
-                    #z front y ok x ok
-                    data[:-z_pad+(z_index_max-z_index_min),:,:]=crop_cube
+                    # z front y ok x ok
+                    data[:-z_pad + (z_index_max - z_index_min), :, :] = crop_cube
                     pass
                 pass
             pass
-        elif(z_index_max==width-1):
-            if(y_index_min==0):
-                if(x_index_min==0):
-                    #z back y front x front
-                    data[z_pad-(z_index_max-z_index_min):,:-y_pad+(y_index_max-y_index_min),:-x_pad+(x_index_max-x_index_min)]=crop_cube
+        elif ((z_index_max == width - 1) and not z_flag):
+            if ((y_index_min == 0) and not y_flag):
+                if ((x_index_min == 0) and not x_flag):
+                    # z back y front x front
+                    data[z_pad - (z_index_max - z_index_min):, :-y_pad + (y_index_max - y_index_min),
+                    :-x_pad + (x_index_max - x_index_min)] = crop_cube
                     pass
-                elif(x_index_max==length-1):
-                    #z back y front x back
-                    data[z_pad-(z_index_max-z_index_min):,:-y_pad+(y_index_max-y_index_min),x_pad-(x_index_max-x_index_min):]=crop_cube
+                elif ((x_index_max == length - 1) and not x_flag):
+                    # z back y front x back
+                    data[z_pad - (z_index_max - z_index_min):, :-y_pad + (y_index_max - y_index_min),
+                    x_pad - (x_index_max - x_index_min):] = crop_cube
                     pass
                 else:
-                    #z back y front x ok
-                    data[z_pad-(z_index_max-z_index_min):,:-y_pad+(y_index_max-y_index_min),:]=crop_cube
+                    # z back y front x ok
+                    data[z_pad - (z_index_max - z_index_min):, :-y_pad + (y_index_max - y_index_min), :] = crop_cube
                     pass
                 pass
-            elif(y_index_max==height-1): 
-                if(x_index_min==0):
-                    #z back y back x front
-                    data[z_pad-(z_index_max-z_index_min):,y_pad-(y_index_max-y_index_min):,:-x_pad+(x_index_max-x_index_min)]=crop_cube
+            elif ((y_index_max == height - 1) and not y_flag):
+                if ((x_index_min == 0) and not x_flag):
+                    # z back y back x front
+                    data[z_pad - (z_index_max - z_index_min):, y_pad - (y_index_max - y_index_min):,
+                    :-x_pad + (x_index_max - x_index_min)] = crop_cube
                     pass
-                elif(x_index_max==length-1):
-                    #z back y back x back
-                    data[z_pad-(z_index_max-z_index_min):,y_pad-(y_index_max-y_index_min):,x_pad-(x_index_max-x_index_min):]=crop_cube
+                elif ((x_index_max == length - 1) and not x_flag):
+                    # z back y back x back
+                    data[z_pad - (z_index_max - z_index_min):, y_pad - (y_index_max - y_index_min):,
+                    x_pad - (x_index_max - x_index_min):] = crop_cube
                     pass
                 else:
-                    #z back y back x ok
-                    data[z_pad-(z_index_max-z_index_min):,y_pad-(y_index_max-y_index_min):,:]=crop_cube
+                    # z back y back x ok
+                    data[z_pad - (z_index_max - z_index_min):, y_pad - (y_index_max - y_index_min):, :] = crop_cube
                     pass
                 pass
-            else: 
-                if(x_index_min==0):
-                    #z back y ok x front
-                    data[z_pad-(z_index_max-z_index_min):,:,:-x_pad+(x_index_max-x_index_min)]=crop_cube
+            else:
+                if ((x_index_min == 0) and not x_flag):
+                    # z back y ok x front
+                    data[z_pad - (z_index_max - z_index_min):, :, :-x_pad + (x_index_max - x_index_min)] = crop_cube
                     pass
-                elif(x_index_max==length-1):
-                    #z back y ok x back
-                    data[z_pad-(z_index_max-z_index_min):,:,x_pad-(x_index_max-x_index_min):]=crop_cube
+                elif ((x_index_max == length - 1) and not x_flag):
+                    # z back y ok x back
+                    data[z_pad - (z_index_max - z_index_min):, :, x_pad - (x_index_max - x_index_min):] = crop_cube
                     pass
                 else:
-                    #z back y ok x ok
-                    data[z_pad-(z_index_max-z_index_min):,:,:]=crop_cube
+                    # z back y ok x ok
+                    data[z_pad - (z_index_max - z_index_min):, :, :] = crop_cube
                     pass
                 pass
             pass
         else:
-            if(y_index_min==0):
-                if(x_index_min==0):
-                    #z ok y front x front
-                    data[:,:-y_pad+(y_index_max-y_index_min),:-x_pad+(x_index_max-x_index_min)]=crop_cube
+            if ((y_index_min == 0) and not y_flag):
+                if ((x_index_min == 0) and not x_flag):
+                    # z ok y front x front
+                    data[:, :-y_pad + (y_index_max - y_index_min), :-x_pad + (x_index_max - x_index_min)] = crop_cube
                     pass
-                elif(x_index_max==length-1):
-                    #z ok y front x back
-                    data[:,:-y_pad+(y_index_max-y_index_min),x_pad-(x_index_max-x_index_min):]=crop_cube
+                elif ((x_index_max == length - 1) and not x_flag):
+                    # z ok y front x back
+                    data[:, :-y_pad + (y_index_max - y_index_min), x_pad - (x_index_max - x_index_min):] = crop_cube
                     pass
                 else:
-                    #z ok y front x ok
-                    data[:,:-y_pad+(y_index_max-y_index_min),:]=crop_cube
+                    # z ok y front x ok
+                    data[:, :-y_pad + (y_index_max - y_index_min), :] = crop_cube
                     pass
                 pass
-            elif(y_index_max==height-1):   #z前面+y后面
-                if(x_index_min==0):
-                    #z ok y back x front
-                    data[:,y_pad-(y_index_max-y_index_min):,:-x_pad+(x_index_max-x_index_min)]=crop_cube
+            elif ((y_index_max == height - 1) and not y_flag):  # z前面+y后面
+                if ((x_index_min == 0) and not x_flag):
+                    # z ok y back x front
+                    data[:, y_pad - (y_index_max - y_index_min):, :-x_pad + (x_index_max - x_index_min)] = crop_cube
                     pass
-                elif(x_index_max==length-1):
-                    #z ok y back x back
-                    data[:,y_pad-(y_index_max-y_index_min):,x_pad-(x_index_max-x_index_min):]=crop_cube
+                elif ((x_index_max == length - 1) and not x_flag):
+                    # z ok y back x back
+                    data[:, y_pad - (y_index_max - y_index_min):, x_pad - (x_index_max - x_index_min):] = crop_cube
                     pass
                 else:
-                    #z ok y back x ok
-                    data[:,y_pad-(y_index_max-y_index_min):,:]=crop_cube
+                    # z ok y back x ok
+                    data[:, y_pad - (y_index_max - y_index_min):, :] = crop_cube
                     pass
                 pass
-            else: 
-                if(x_index_min==0):
-                    #z ok y ok x front
-                    data[:,:,:-x_pad+(x_index_max-x_index_min)]=crop_cube
+            else:
+                if ((x_index_min == 0) and not x_flag):
+                    # z ok y ok x front
+                    data[:, :, :-x_pad + (x_index_max - x_index_min)] = crop_cube
                     pass
-                elif(x_index_max==length-1):
-                    #z ok y ok x back
-                    data[:,:,x_pad-(x_index_max-x_index_min):]=crop_cube
+                elif ((x_index_max == length - 1) and not x_flag):
+                    # z ok y ok x back
+                    data[:, :, x_pad - (x_index_max - x_index_min):] = crop_cube
                     pass
                 else:
-                    #z ok y ok x ok
-                    data[:,:,:]=crop_cube
+                    # z ok y ok x ok
+                    data[:, :, :] = crop_cube
                     pass
                 pass
             pass
 
-        yield data,label
+        yield data, label
+
+
 '''
 把CT图像进行处理，只保留肺部图像
 输入：
