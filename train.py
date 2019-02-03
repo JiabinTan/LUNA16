@@ -7,7 +7,7 @@
 import sys
 import tensorflow as tf
 from tf.keras.models import Model
-from dara_proc.TFRecord_proc import TFRecord as tfrd
+from data_proc.TFRecord_proc import TFRecord as tfrd
 
 from Config.Config import Config as conf
 from tensorflow.python.ops import array_ops
@@ -18,7 +18,7 @@ from tf.keras.callbacks import LearningRateScheduler
 from CNN import CNN_3d
 
 from tf.keras.callbacks import ModelCheckpoint
-from data_aug import augmentate
+from data_proc.data_aug import augmentate
 
 
 '''
